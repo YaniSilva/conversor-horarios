@@ -1,69 +1,85 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor de Horarios</title>
-    <style>
-        /* Aquí va algo de CSS básico para darle estilo */
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #746f6f;
-        }
-        .container {
-            background: rgb(219, 218, 218);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
-            text-align: center;
-        }
-        label, select, button {
-            display: block;
-            margin: 10px 0;
-            width: 100%;
-        }
-        button {
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #calcular {
-            background-color: #4CAF50;
-            color: white;
-        }
-        #resetear {
-            background-color: #f44336;
-            color: white;
-        }
-    </style>
+    <!--Con lo siguiente se conecta a la pagina de estilos-->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h2>Conversor de Horarios para Reuniones</h2>
-        
-        <!-- Selector para horario en Argentina -->
+
         <label for="hora-argentina">Horario en Argentina:</label>
         <input type="time" id="hora-argentina">
 
-        <!-- Selector para horario en España -->
         <label for="hora-espana">Horario en España:</label>
         <input type="time" id="hora-espana">
 
-        <!-- Selector para horario en Panamá -->
         <label for="hora-panama">Horario en Panamá:</label>
         <input type="time" id="hora-panama">
 
-        <!-- Botón para calcular -->
         <button id="calcular">Calcular</button>
-
-        <!-- Botón para resetear -->
         <button id="resetear">Resetear</button>
     </div>
+
+    <script>
+        // Paso 1: Seleccionar los elementos del HTML
+        const horaArgentina = document.getElementById('hora-argentina');
+        const horaEspana = document.getElementById('hora-espana');
+        const horaPanama = document.getElementById('hora-panama');
+        const botonCalcular = document.getElementById('calcular');
+        const botonResetear = document.getElementById('resetear');
+
+        // Paso 2: Definir las diferencias horarias (en horas)
+        const diferenciaArgentinaEspana = 4; // España está 4 horas por delante de Argentina
+        const diferenciaArgentinaPanama = -2; // Panamá está 2 horas detrás de Argentina
+
+        // Paso 3: Función para calcular los horarios
+        function calcularHorarios() {
+            // Validar que solo un campo tenga valor
+            const valores = [horaArgentina.value, horaEspana.value, horaPanama.value];
+            const camposLlenos = valores.filter(valor => valor !== '');
+            
+            if (camposLlenos.length !== 1) {
+                alert('Por favor, ingresa un solo horario para calcular.');
+                return;
+            }
+
+            // Calcular basado en el campo lleno
+            if (horaArgentina.value) {
+                const [horas, minutos] = horaArgentina.value.split(':').map(Number);
+                horaEspana.value = ajustarHorario(horas + diferenciaArgentinaEspana, minutos);
+                horaPanama.value = ajustarHorario(horas + diferenciaArgentinaPanama, minutos);
+            } else if (horaEspana.value) {
+                const [horas, minutos] = horaEspana.value.split(':').map(Number);
+                horaArgentina.value = ajustarHorario(horas - diferenciaArgentinaEspana, minutos);
+                horaPanama.value = ajustarHorario(horas - (diferenciaArgentinaEspana - diferenciaArgentinaPanama), minutos);
+            } else if (horaPanama.value) {
+                const [horas, minutos] = horaPanama.value.split(':').map(Number);
+                horaArgentina.value = ajustarHorario(horas - diferenciaArgentinaPanama, minutos);
+                horaEspana.value = ajustarHorario(horas - (diferenciaArgentinaPanama - diferenciaArgentinaEspana), minutos);
+            }
+        }
+
+        // Paso 4: Función para ajustar horarios (asegurar que sean válidos en formato 24h)
+        function ajustarHorario(horas, minutos) {
+            if (horas >= 24) horas -= 24;
+            if (horas < 0) horas += 24;
+            return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
+        }
+
+        // Paso 5: Función para resetear los campos
+        function resetearCampos() {
+            horaArgentina.value = '';
+            horaEspana.value = '';
+            horaPanama.value = '';
+        }
+
+        // Paso 6: Vincular las funciones a los botones
+        botonCalcular.addEventListener('click', calcularHorarios);
+        botonResetear.addEventListener('click', resetearCampos);
+    </script>
 </body>
 </html>
